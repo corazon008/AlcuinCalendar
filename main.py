@@ -1,6 +1,6 @@
 import fastapi.responses
 from fastapi import FastAPI
-import uvicorn
+import uvicorn, os
 
 from AlcuinSelenium import AlcuinSelenium
 app = FastAPI()
@@ -34,6 +34,17 @@ async def refresh_calendar(apiKey: str =""):
     alcuin = AlcuinSelenium(apiKey, *user, headless=True)
     alcuin.GetCalendar()
     return {"message": "Calendar refreshed"}
+
+@app.get("/create_user")
+async def create_user(apiKey: str ="", username: str="", password: str=""):
+    if apiKey == "":
+        return {"message": "No API key provided"}
+    if not os.path.exists("Secrets/login.txt"):
+        with open("Secrets/login.txt", "w") as file:
+            pass
+    with open("Secrets/login.txt", "a") as file:
+        file.write(f"{apiKey} {username} {password}\n")
+    return {"message": "User created"}
 
 if __name__ == '__main__':
     uvicorn.run("main:app", host="0.0.0.0", port=5000, workers=2)
