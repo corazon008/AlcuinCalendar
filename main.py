@@ -37,6 +37,9 @@ async def refresh_calendar(apiKey: str =""):
 
 @app.get("/create_user")
 async def create_user(username: str="", password: str=""):
+    #verifier si le dossier existe
+    if not os.path.exists("Secrets"):
+        os.mkdir("Secrets")
     if not os.path.exists("Secrets/login.txt"):
         with open("Secrets/login.txt", "w") as file:
             pass
