@@ -11,8 +11,11 @@ app = FastAPI()
 async def root(apiKey: str =""):
     if apiKey == "":
         return {"message": "No API key provided"}
-    with open(f"{SECRETS_FOLDER}/{apiKey}.ics", "r", encoding="utf-8") as file:
-        return file.read()
+    try:
+        with open(f"{SECRETS_FOLDER}/{apiKey}.ics", "r", encoding="utf-8") as file:
+            return file.read()
+    except FileNotFoundError:
+        return {"message": "No calendar found"}
 
 @app.get("/calendar.ics",
              response_class=fastapi.responses.FileResponse)
