@@ -4,6 +4,7 @@ from selenium.webdriver.support.ui import Select
 from selenium import webdriver
 from bs4 import BeautifulSoup
 
+from VARS import SECRETS_FOLDER
 from WriteCalendar import WriteCalendar
 
 
@@ -95,7 +96,7 @@ class AlcuinSelenium:
         self.driver.close()
 
 if __name__ == '__main__':
-    with open("Secrets/login.txt", "r") as file:
+    with open(f"{SECRETS_FOLDER}/login.txt", "r") as file:
         apikey, username, password = file.read().split(" ")
     alcuin = AlcuinSelenium(apikey, username, password, headless=False)
     alcuin.login()

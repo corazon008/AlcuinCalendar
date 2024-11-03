@@ -1,4 +1,5 @@
 from datetime import datetime
+from VARS import SECRETS_FOLDER
 
 def convertir_en_datetime(date, heure):
     date_obj = datetime.strptime(date, '%d/%m/%Y')
@@ -9,7 +10,7 @@ class WriteCalendar:
 
     def beginWriting(self, filename):
         print("Writing calendar")
-        self.file_stream = open(f"Secrets/{filename}.ics", "w", encoding="utf-8")
+        self.file_stream = open(f"{SECRETS_FOLDER}/{filename}.ics", "w", encoding="utf-8")
         self.file_stream.write("BEGIN:VCALENDAR\n")
         self.file_stream.write("VERSION:2.0\n")
         self.file_stream.write("PRODID:-//My Calendar//EN\n")
