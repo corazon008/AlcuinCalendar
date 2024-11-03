@@ -56,7 +56,6 @@ class AlcuinSelenium:
         print("End of goToAgenda")
 
     def ScrapAgenda(self)->None:
-
         writeCalendar = WriteCalendar()
         writeCalendar.beginWriting(self.api)
 

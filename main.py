@@ -14,12 +14,9 @@ async def root(apiKey: str =""):
         return file.read()
 
 @app.get("/calendar.ics",
-             response_class=fastapi.responses.PlainTextResponse)
+             response_class=fastapi.responses.FileResponse)
 async def calendar(apiKey: str =""):
-    if apiKey == "":
-        return {"message": "No API key provided"}
-    with open(f"Secrets/{apiKey}.ics", "r", encoding="utf-8") as file:
-        return file.read()
+    return f"Secrets/{apiKey}.ics"
 
 @app.get("/refresh_calendar")
 async def refresh_calendar(apiKey: str =""):
