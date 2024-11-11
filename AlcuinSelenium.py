@@ -3,6 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium import webdriver
 from bs4 import BeautifulSoup
+import platform
 
 from VARS import SECRETS_FOLDER
 from WriteCalendar import WriteCalendar
@@ -10,20 +11,30 @@ from WriteCalendar import WriteCalendar
 
 class AlcuinSelenium:
     def __init__(self, api:str, username:str, password:str, headless=False):
-        try:
-            options = webdriver.ChromeOptions()
-            if headless:
-                options.add_argument('headless')
-            self.driver = webdriver.Chrome(options=options)
-        except:
-            options = webdriver.FirefoxOptions()
-            if headless:
-                options.add_argument('--headless')
-            self.driver = webdriver.Firefox(options=options)
-        finally:
-            self.driver.implicitly_wait(10)
+        if platform.system() == "Windows":
+            try:
+                options = webdriver.ChromeOptions()
+                if headless:
+                    options.add_argument('headless')
+                self.driver = webdriver.Chrome(options=options)
+            except:
+                options = webdriver.FirefoxOptions()
+                if headless:
+                    options.add_argument('--headless')
+                self.driver = webdriver.Firefox(options=options)
 
+        else:
+            from selenium.webdriver.chrome.options import Options
+            from selenium.webdriver.chrome.service import Service
+            from webdriver_manager.chrome import ChromeDriverManager
 
+            options = Options()
+            options.add_argument('--headless')
+            options.add_argument('--no-sandbox')
+            options.add_argument('--disable-dev-shm-usage')
+            self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+
+        self.driver.implicitly_wait(10)
         self.driver.get("https://esaip.alcuin.com/OpDotNet/Noyau/Login.aspx?")
         self.username = username
         self.password = password
