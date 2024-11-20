@@ -41,7 +41,7 @@ async def calendar(apiKey: str = ""):
         return file_path
     else:
         logging.error(f"Calendar file not found: {file_path}")
-        return {"message": "Calendar file not found"}
+        return ""
 
 @app.get("/refresh_calendar")
 async def refresh_calendar(apiKey: str = ""):

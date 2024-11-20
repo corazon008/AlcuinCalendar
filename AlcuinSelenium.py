@@ -24,15 +24,11 @@ class AlcuinSelenium:
                 self.driver = webdriver.Firefox(options=options)
 
         else:
-            from selenium.webdriver.chrome.options import Options
-            from selenium.webdriver.chrome.service import Service
-            from webdriver_manager.chrome import ChromeDriverManager
+            from selenium.webdriver import FirefoxOptions
 
-            options = Options()
-            options.add_argument('--headless')
-            options.add_argument('--no-sandbox')
-            options.add_argument('--disable-dev-shm-usage')
-            self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+            opts = FirefoxOptions()
+            opts.add_argument("--headless")
+            self.driver = webdriver.Firefox(options=opts)
 
         self.driver.implicitly_wait(10)
         self.driver.get("https://esaip.alcuin.com/OpDotNet/Noyau/Login.aspx?")
@@ -40,17 +36,16 @@ class AlcuinSelenium:
         self.password = password
         self.api = api
 
-    def GetCalendar(self) -> str:
+    def GetCalendar(self) -> None:
         self.login()
         self.goToAgenda()
-        calendar = self.ScrapAgenda()
         self.close()
-        return calendar
 
     def login(self):
         print("login")
         self.driver.find_element(By.XPATH, """//*[@id="UcAuthentification1_UcLogin1_txtLogin"]""").send_keys(self.username)
         self.driver.find_element(By.XPATH, """//*[@id="UcAuthentification1_UcLogin1_txtPassword"]""").send_keys(self.password)
+        time.sleep(1)
 
         self.driver.find_element(By.XPATH, """//*[@id="UcAuthentification1_UcLogin1_btnEntrer"]""").click()
         print("End of login")
