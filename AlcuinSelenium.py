@@ -6,17 +6,17 @@ from bs4 import BeautifulSoup
 import platform
 
 from VARS import SECRETS_FOLDER
-from WriteCalendar import WriteCalendar
+from ICalWriter import ICalWriter
 
 
 class AlcuinSelenium:
-    def __init__(self, api:str, username:str, password:str, headless=False):
+    def __init__(self, token:str, username:str, password:str, headless=False):
         if platform.system() == "Windows":
             try:
-                options = webdriver.ChromeOptions()
+                options = webdriver.FirefoxOptions()
                 if headless:
-                    options.add_argument('headless')
-                self.driver = webdriver.Chrome(options=options)
+                    options.add_argument('--headless')
+                self.driver = webdriver.Firefox(options=options)
             except:
                 options = webdriver.FirefoxOptions()
                 if headless:
@@ -34,7 +34,7 @@ class AlcuinSelenium:
         self.driver.get("https://esaip.alcuin.com/OpDotNet/Noyau/Login.aspx?")
         self.username = username
         self.password = password
-        self.api = api
+        self.token = token
 
     def GetCalendar(self) -> None:
         self.login()
@@ -63,8 +63,7 @@ class AlcuinSelenium:
         print("End of goToAgenda")
 
     def ScrapAgenda(self)->None:
-        writeCalendar = WriteCalendar()
-        writeCalendar.beginWriting(self.api)
+        icalwriter = ICalWriter()
 
         self.driver.switch_to.default_content()
         self.driver.switch_to.frame(self.driver.find_element(By.XPATH, "/html/frameset/frameset/frame[3]"))
@@ -75,7 +74,7 @@ class AlcuinSelenium:
         rows = soup.find_all('tr')
         for row in rows[1:]:
             cells = row.find_all('td')
-            writeCalendar.writeEventWithTD(cells)
+            icalwriter.add_event_from_cells(cells)
 
         for _ in range(3):
             self.nextMonth()
@@ -89,9 +88,9 @@ class AlcuinSelenium:
             rows = soup.find_all('tr')
             for row in rows[1:]:
                 cells = row.find_all('td')
-                writeCalendar.writeEventWithTD(cells)
+                icalwriter.add_event_from_cells(cells)
 
-        writeCalendar.endWriting()
+        icalwriter.write_to_file(self.token)
 
     def nextMonth(self):
         self.driver.execute_script("SelDat(document.formul.CurDat,null,'MovDat');return false;")
