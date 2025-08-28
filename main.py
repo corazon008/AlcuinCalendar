@@ -10,6 +10,11 @@ app = Flask(__name__)
 
 CACHE_DURATION = 3600  # 1 heure
 
+#default route
+@app.route('/')
+def index():
+    return "Welcome to the Calendar Feed Service!"
+
 @app.route('/agenda.ics')
 def calendar_feed():
     # Vérification du token
