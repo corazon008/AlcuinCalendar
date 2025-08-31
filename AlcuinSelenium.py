@@ -11,25 +11,7 @@ from ICalWriter import ICalWriter
 
 class AlcuinSelenium:
     def __init__(self, token:str, username:str, password:str, headless=False):
-        if platform.system() == "Windows":
-            try:
-                options = webdriver.FirefoxOptions()
-                if headless:
-                    options.add_argument('--headless')
-                self.driver = webdriver.Firefox(options=options)
-            except:
-                options = webdriver.FirefoxOptions()
-                if headless:
-                    options.add_argument('--headless')
-                self.driver = webdriver.Firefox(options=options)
-
-        else:
-            from selenium.webdriver import FirefoxOptions
-
-            opts = FirefoxOptions()
-            opts.add_argument("--headless")
-            self.driver = webdriver.Firefox(options=opts)
-
+        self.driver = webdriver.Firefox()
         self.driver.implicitly_wait(10)
         self.driver.get("https://esaip.alcuin.com/OpDotNet/Noyau/Login.aspx?")
         self.username = username
