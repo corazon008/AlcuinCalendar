@@ -15,8 +15,8 @@ After=network.target
 
 [Service]
 User=$USER
-WorkingDirectory=$(pwd)/AlcuinCalendar
-ExecStart=$(pwd)/AlcuinCalendar/run.sh
+WorkingDirectory=$(pwd)
+ExecStart=$(pwd)/run.sh
 Restart=always
 Environment=PYTHONUNBUFFERED=1
 
