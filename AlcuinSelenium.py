@@ -1,3 +1,5 @@
+import json
+import os
 import time
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
@@ -5,6 +7,7 @@ from selenium import webdriver
 from bs4 import BeautifulSoup
 import platform
 
+import VARS
 from VARS import SECRETS_FOLDER
 from ICalWriter import ICalWriter
 
@@ -83,11 +86,22 @@ class AlcuinSelenium:
         self.driver.close()
 
 if __name__ == '__main__':
-    with open(f"{SECRETS_FOLDER}/login.txt", "r") as file:
-        apikey, username, password = file.read().split(" ")
-    alcuin = AlcuinSelenium(apikey, username, password, headless=False)
-    alcuin.login()
-    alcuin.goToAgenda()
-    alcuin.ScrapAgenda()
-    alcuin.close()
+    logins_path = os.path.join(VARS.SECRETS_FOLDER, VARS.LOGINS_FILE)
+    if os.path.exists(logins_path):
+        with open(logins_path, 'r') as f:
+            try:
+                logins = json.load(f)
+            except Exception:
+                logins = {}
+    else:
+        logins = {}
+    for username, info in logins.items():
+        password = info['password']
+        apikey = info['token']
+        print(f'Getting calendar for {username}')
+        alcuin = AlcuinSelenium(apikey, username, password, headless=False)
+        alcuin.login()
+        alcuin.goToAgenda()
+        alcuin.ScrapAgenda()
+        alcuin.close()
     

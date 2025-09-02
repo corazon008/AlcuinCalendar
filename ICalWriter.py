@@ -13,7 +13,7 @@ class ICalWriter:
 
         # Ajout du composant VTIMEZONE pour Europe/Paris
         tz = gettz('Europe/Paris')
-        tzc = Timezone('Europe/Paris')
+        tzc = Timezone()
         tzc.add('TZID', 'Europe/Paris')
         self.calendar.add_component(tzc)
 
