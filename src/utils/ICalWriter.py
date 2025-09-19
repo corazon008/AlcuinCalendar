@@ -3,7 +3,8 @@ from datetime import datetime
 from icalendar import Calendar, Event, vText, vDatetime, Timezone
 import pytz
 from dateutil.tz import gettz
-from VARS import *
+from src.utils.VARS import CALENDAR_FOLDER
+
 
 class ICalWriter:
     def __init__(self):
@@ -42,7 +43,7 @@ class ICalWriter:
         return datetime.combine(date.date(), heure.time())
 
     def write_to_file(self, filename):
-        with open(f"{SECRETS_FOLDER}/{filename}.ics", 'wb') as f:
+        with open(CALENDAR_FOLDER / f"{filename}.ics", 'wb') as f:
             f.write(self.calendar.to_ical())
 
     def get_ical(self):

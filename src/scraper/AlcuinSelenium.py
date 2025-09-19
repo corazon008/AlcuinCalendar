@@ -5,15 +5,14 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium import webdriver
 from bs4 import BeautifulSoup
-import platform
 
-import VARS
-from VARS import SECRETS_FOLDER
-from ICalWriter import ICalWriter
+from src.utils.VARS import USERS_FILE
+from src.utils.ICalWriter import ICalWriter
+from src.utils.UserManager import UserManager
 
 
 class AlcuinSelenium:
-    def __init__(self, token:str, username:str, password:str, headless=False):
+    def __init__(self, token: str, username: str, password: str, headless: bool = False):
         self.driver = webdriver.Firefox()
         self.driver.implicitly_wait(10)
         self.driver.get("https://esaip.alcuin.com/OpDotNet/Noyau/Login.aspx?")
@@ -21,33 +20,40 @@ class AlcuinSelenium:
         self.password = password
         self.token = token
 
-    def GetCalendar(self) -> None:
-        self.login()
-        self.goToAgenda()
+    def get_calendar(self) -> None:
+        """Main function to get the calendar"""
+        self.__login()
+        self.__go_to_agenda()
+        self.__scrap_agenda()
         self.close()
 
-    def login(self):
-        print("login")
-        self.driver.find_element(By.XPATH, """//*[@id="UcAuthentification1_UcLogin1_txtLogin"]""").send_keys(self.username)
-        self.driver.find_element(By.XPATH, """//*[@id="UcAuthentification1_UcLogin1_txtPassword"]""").send_keys(self.password)
+    def __login(self):
+        print("Begin login")
+        self.driver.find_element(By.XPATH, """//*[@id="UcAuthentification1_UcLogin1_txtLogin"]""").send_keys(
+            self.username)
+        self.driver.find_element(By.XPATH, """//*[@id="UcAuthentification1_UcLogin1_txtPassword"]""").send_keys(
+            self.password)
         time.sleep(1)
 
         self.driver.find_element(By.XPATH, """//*[@id="UcAuthentification1_UcLogin1_btnEntrer"]""").click()
         print("End of login")
 
-    def goToAgenda(self):
-        print("goToAgenda")
-        self.driver.execute_script("""window.parent.content.location = '/OpDotnet/commun/Login/aspxtoasp.aspx?url=/Eplug/Agenda/Agenda.asp?IdApplication=190&TypeAcces=Utilisateur&IdLien=649';""")
+    def __go_to_agenda(self):
+        print("Begin go to agenda")
+        self.driver.execute_script(
+            """window.parent.content.location = '/OpDotnet/commun/Login/aspxtoasp.aspx?url=/Eplug/Agenda/Agenda.asp?IdApplication=190&TypeAcces=Utilisateur&IdLien=649';""")
 
         self.driver.switch_to.default_content()
         self.driver.switch_to.frame(self.driver.find_element(By.XPATH, """/html/frameset/frameset/frame[3]"""))
 
-        select = Select(self.driver.find_element(By.XPATH, """/html/body/form/div/table[1]/tbody/tr/td/div/table/tbody/tr[4]/td[1]/select"""))
+        select = Select(self.driver.find_element(By.XPATH,
+                                                 """/html/body/form/div/table[1]/tbody/tr/td/div/table/tbody/tr[4]/td[1]/select"""))
         select.select_by_visible_text("Tableau")
 
-        print("End of goToAgenda")
+        print("End of go to agenda")
 
-    def ScrapAgenda(self)->None:
+    def __scrap_agenda(self) -> None:
+        print("Begin scrap agenda")
         icalwriter = ICalWriter()
 
         self.driver.switch_to.default_content()
@@ -62,7 +68,7 @@ class AlcuinSelenium:
             icalwriter.add_event_from_cells(cells)
 
         for _ in range(3):
-            self.nextMonth()
+            self.__next_month()
             while soup == BeautifulSoup(self.driver.find_element(By.XPATH,
                                                                  """/html/body/form/div/table[2]/tbody/tr/td/div/table/tbody/tr[2]/td/table/tbody""").get_attribute(
                 'innerHTML'), 'html.parser'):
@@ -76,8 +82,9 @@ class AlcuinSelenium:
                 icalwriter.add_event_from_cells(cells)
 
         icalwriter.write_to_file(self.token)
+        print("End of scrap agenda")
 
-    def nextMonth(self):
+    def __next_month(self):
         self.driver.execute_script("SelDat(document.formul.CurDat,null,'MovDat');return false;")
         self.driver.execute_script("SelMoiSui();")
         self.driver.execute_script("SetSelDat();")
@@ -85,23 +92,13 @@ class AlcuinSelenium:
     def close(self):
         self.driver.close()
 
+
 if __name__ == '__main__':
-    logins_path = os.path.join(VARS.SECRETS_FOLDER, VARS.LOGINS_FILE)
-    if os.path.exists(logins_path):
-        with open(logins_path, 'r') as f:
-            try:
-                logins = json.load(f)
-            except Exception:
-                logins = {}
-    else:
-        logins = {}
-    for username, info in logins.items():
-        password = info['password']
-        apikey = info['token']
+    users = UserManager()
+
+    for token in users.list_tokens():
+        username = users.get_user(token)['username']
+        password = users.get_user(token)['password']
         print(f'Getting calendar for {username}')
-        alcuin = AlcuinSelenium(apikey, username, password, headless=False)
-        alcuin.login()
-        alcuin.goToAgenda()
-        alcuin.ScrapAgenda()
-        alcuin.close()
-    
+        alcuin = AlcuinSelenium(token, username, password, headless=False)
+        alcuin.get_calendar()
