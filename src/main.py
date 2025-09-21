@@ -78,8 +78,8 @@ def refresh():
     password = user['password']
 
     # Regenerate ICS file using AlcuinSelenium
-    from src.scraper.AlcuinSelenium import AlcuinSelenium  # Import here to avoid circular import issues
-    alcuin = AlcuinSelenium(token, username, password, headless=True)
+    from scraper.AlcuinSelenium import AlcuinSelenium  # Import here to avoid circular import issues
+    alcuin = AlcuinSelenium(token, username, password, headless=False)
     try:
         alcuin.get_calendar()
     except Exception as e:

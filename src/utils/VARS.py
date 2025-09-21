@@ -5,7 +5,7 @@ BASE_DIR: Path = Path(__file__).resolve().parent.parent.parent
 # Folders
 SECRETS_FOLDER: Path = BASE_DIR / "Secrets"
 LOG_FOLDER: Path = BASE_DIR / "Logs"
-CALENDAR_FOLDER: Path = BASE_DIR / "Calendar"
+CALENDAR_FOLDER: Path = BASE_DIR / "Calendars"
 
 ## Create folders if they don't exist
 SECRETS_FOLDER.mkdir(parents=True, exist_ok=True)

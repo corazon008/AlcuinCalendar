@@ -3,7 +3,7 @@ from datetime import datetime
 from icalendar import Calendar, Event, vText, vDatetime, Timezone
 import pytz
 from dateutil.tz import gettz
-from src.utils.VARS import CALENDAR_FOLDER
+from utils.VARS import CALENDAR_FOLDER
 
 
 class ICalWriter:

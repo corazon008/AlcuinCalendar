@@ -6,14 +6,30 @@ from selenium.webdriver.support.ui import Select
 from selenium import webdriver
 from bs4 import BeautifulSoup
 
-from src.utils.VARS import USERS_FILE
-from src.utils.ICalWriter import ICalWriter
-from src.utils.UserManager import UserManager
+from utils.VARS import USERS_FILE
+from utils.ICalWriter import ICalWriter
+from utils.UserManager import UserManager
 
 
 class AlcuinSelenium:
     def __init__(self, token: str, username: str, password: str, headless: bool = False):
-        self.driver = webdriver.Firefox()
+        # try to connect to the firefox server
+        try :
+            options = webdriver.FirefoxOptions()
+            if headless:
+                options.add_argument('--headless')
+            self.driver = webdriver.Remote(
+                command_executor=os.getenv("SELENIUM_URL"),
+                options=options
+            )
+        except Exception as e:
+            print(f"Failed to connect to remote webdriver: {e}. Falling back to local Firefox driver.")
+            options = webdriver.FirefoxOptions()
+            if headless:
+                options.add_argument('--headless')
+            self.driver = webdriver.Firefox(options=options)
+
+        #self.driver = webdriver.Firefox()
         self.driver.implicitly_wait(10)
         self.driver.get("https://esaip.alcuin.com/OpDotNet/Noyau/Login.aspx?")
         self.username = username
@@ -90,7 +106,10 @@ class AlcuinSelenium:
         self.driver.execute_script("SetSelDat();")
 
     def close(self):
-        self.driver.close()
+        try :
+            self.driver.quit()
+        except Exception as e:
+            print(f"Failed to close the driver: {e}")
 
 
 if __name__ == '__main__':

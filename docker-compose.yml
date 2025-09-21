@@ -1,0 +1,31 @@
+services:
+  standalone-firefox:
+    image: 'selenium/standalone-firefox:4.35.0-20250828'
+    shm_size: 2g
+    ports:
+      - '7900:7900'  # VNC (optionnel)
+      - '4444:4444'  # WebDriver
+    restart: unless-stopped  # optionnel, pour relancer si crash
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:4444/wd/hub/status" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  api-alcuin-calendar:
+    build: .
+    depends_on:
+      standalone-firefox:
+        condition: service_healthy
+
+    environment:
+      # exemple : URL de Selenium accessible depuis Python
+      SELENIUM_URL: http://standalone-firefox:4444/wd/hub
+    ports:
+      - 5000:5000  # exposer le port de ton API si besoin
+    volumes:
+      - ./Logs:/app/Logs     # pour persister les logs hors du container
+      - ./Secrets:/app/Secrets  # pour tes fichiers secrets
+    #command: ["uv", "run", "main"]  # ou ton CMD par défaut dans Dockerfile
+    restart: unless-stopped

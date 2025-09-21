@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from src.utils.VARS import USERS_FILE
+from utils.VARS import USERS_FILE
 
 
 class UserManager:
