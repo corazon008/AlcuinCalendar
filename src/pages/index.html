@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Accueil - API Alcuin Calendar</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background: #f7f7f7; }
+        .container { max-width: 400px; margin: auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        h1 { text-align: center; }
+        label { display: block; margin-top: 15px; }
+        input[type="text"], input[type="password"] { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; }
+        button { margin-top: 20px; width: 100%; padding: 10px; background: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 20px; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>API Alcuin Calendar</h1>
+        <p>Ce projet permet de générer un calendrier personnalisé (.ics) à partir de vos identifiants Alcuin, accessible via une API sécurisée. Inscrivez-vous ci-dessous pour obtenir votre token d'accès.</p>
+        <form id="registerForm">
+            <label for="username">Nom d'utilisateur :</label>
+            <input type="text" id="username" name="username" required>
+            <label for="password">Mot de passe :</label>
+            <input type="password" id="password" name="password" required>
+            <button type="submit">S'inscrire / Obtenir le token</button>
+        </form>
+        <div class="result" id="result"></div>
+    </div>
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = 'Traitement en cours...';
+            try {
+                const response = await fetch(`/register?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`);
+                const data = await response.json();
+                if (response.ok && data.token) {
+                    resultDiv.innerHTML = `<b>Votre token :</b> <code>${data.token}</code><br>Utilisez-le pour accéder à votre calendrier.`;
+                } else {
+                    resultDiv.textContent = data.error || 'Erreur inconnue.';
+                }
+            } catch (err) {
+                resultDiv.textContent = 'Erreur de connexion à l’API.';
+            }
+        });
+    </script>
+</body>
+</html>

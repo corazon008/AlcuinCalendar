@@ -3,7 +3,7 @@ import hashlib
 
 from flask import Flask, Response, request, jsonify
 from utils.UserManager import UserManager
-from utils.VARS import SECRETS_FOLDER
+from utils.VARS import SECRETS_FOLDER, BASE_DIR
 
 
 app = Flask(__name__)
@@ -16,7 +16,10 @@ users = UserManager()
 # default route
 @app.route('/')
 def index():
-    return "Welcome to the Calendar Feed Service!"
+    html_path = os.path.join(BASE_DIR, 'src', 'pages', 'index.html')
+    with open(html_path, 'r', encoding='utf-8') as f:
+        html = f.read()
+    return Response(html, mimetype='text/html')
 
 
 @app.route('/register')
