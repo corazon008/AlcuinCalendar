@@ -27,5 +27,6 @@ services:
     volumes:
       - ./Logs:/app/Logs     # pour persister les logs hors du container
       - ./Secrets:/app/Secrets  # pour tes fichiers secrets
+      - ./Calendars:/app/Calendars  # pour tes fichiers de calendrier
     #command: ["uv", "run", "main"]  # ou ton CMD par défaut dans Dockerfile
     restart: unless-stopped
