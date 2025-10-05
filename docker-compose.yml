@@ -8,6 +8,8 @@ services:
     ports:
       - '7900:7900'  # VNC (optionnel)
     restart: unless-stopped  # optionnel, pour relancer si crash
+    dns:
+      - 1.1.1.1
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:4444/wd/hub/status" ]
       interval: 5s
