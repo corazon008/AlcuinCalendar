@@ -1,6 +1,6 @@
 services:
   standalone-firefox:
-    container_name: selenium-firefox
+    container_name: standalone-firefox
     image: 'selenium/standalone-firefox:4.35.0-20250828'
     shm_size: 2g
     ports:
