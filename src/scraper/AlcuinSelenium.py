@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 from utils.VARS import USERS_FILE
 from utils.ICalWriter import ICalWriter
 from utils.UserManager import UserManager
+from utils import utils
 
 
 class AlcuinSelenium:
@@ -56,7 +57,7 @@ class AlcuinSelenium:
 
     def __go_to_agenda(self):
         print("Begin go to agenda")
-        self.driver.execute_script(
+        utils.retry(self.driver.execute_script, 5, 2,
             """window.parent.content.location = '/OpDotnet/commun/Login/aspxtoasp.aspx?url=/Eplug/Agenda/Agenda.asp?IdApplication=190&TypeAcces=Utilisateur&IdLien=649';""")
 
         self.driver.switch_to.default_content()
