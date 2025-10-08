@@ -6,6 +6,7 @@ def refresh_calendars(token: str, username: str, password: str)-> bool:
     try:
         alcuin.get_calendar()
     except Exception as e:
+        print(f"Error refreshing calendar for user {username}: {e}")
         return False
     finally:
         alcuin.close()

@@ -66,7 +66,6 @@ def agenda():
         }
     )
 
-
 @app.route('/refresh')
 def refresh():
     token = request.args.get('token')
