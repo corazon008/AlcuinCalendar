@@ -46,11 +46,20 @@ class AlcuinSelenium:
 
     def __login(self):
         print("Begin login")
-        self.driver.find_element(By.XPATH, """//*[@id="UcAuthentification1_UcLogin1_txtLogin"]""").send_keys(
+        login_field = """//*[@id="UcAuthentification1_UcLogin1_txtLogin"]"""
+        password_field = """//*[@id="UcAuthentification1_UcLogin1_txtPassword"]"""
+        self.driver.find_element(By.XPATH, login_field).clear()
+        self.driver.find_element(By.XPATH, login_field).send_keys(
             self.username)
-        self.driver.find_element(By.XPATH, """//*[@id="UcAuthentification1_UcLogin1_txtPassword"]""").send_keys(
+
+        self.driver.find_element(By.XPATH, password_field).clear()
+        self.driver.find_element(By.XPATH, password_field).send_keys(
             self.password)
         time.sleep(1)
+
+        if self.driver.find_element(By.XPATH, password_field).text == "" or self.driver.find_element(By.XPATH, login_field).text == "":
+            self.__login()
+            return 
 
         self.driver.find_element(By.XPATH, """//*[@id="UcAuthentification1_UcLogin1_btnEntrer"]""").click()
         print("End of login")
