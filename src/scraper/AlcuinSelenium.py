@@ -2,6 +2,8 @@ import json
 import os
 import time
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.ui import Select
 from selenium import webdriver
 from bs4 import BeautifulSoup
@@ -46,22 +48,22 @@ class AlcuinSelenium:
 
     def __login(self):
         print("Begin login")
-        login_field = """//*[@id="UcAuthentification1_UcLogin1_txtLogin"]"""
-        password_field = """//*[@id="UcAuthentification1_UcLogin1_txtPassword"]"""
-        self.driver.find_element(By.XPATH, login_field).clear()
-        self.driver.find_element(By.XPATH, login_field).send_keys(
-            self.username)
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, """//*[@id="UcAuthentification1_UcLogin1_txtLogin"]""")))
+        login_field = self.driver.find_element(By.XPATH, """//*[@id="UcAuthentification1_UcLogin1_txtLogin"]""")
+        password_field = self.driver.find_element(By.XPATH, """//*[@id="UcAuthentification1_UcLogin1_txtPassword"]""")
 
-        self.driver.find_element(By.XPATH, password_field).clear()
-        self.driver.find_element(By.XPATH, password_field).send_keys(
-            self.password)
-        time.sleep(1)
+        login_field.clear()
+        login_field.send_keys(self.username)
 
-        if self.driver.find_element(By.XPATH, password_field).text == "" or self.driver.find_element(By.XPATH, login_field).text == "":
-            self.__login()
-            return 
+        password_field.clear()
+        password_field.send_keys(self.password)
+        time.sleep(2)
 
-        self.driver.find_element(By.XPATH, """//*[@id="UcAuthentification1_UcLogin1_btnEntrer"]""").click()
+        #WebDriverWait(self.driver, 10).until_not(EC.text_to_be_present_in_element((By.XPATH, """//*[@id="UcAuthentification1_UcLogin1_txtLogin"]"""), ""))
+        #WebDriverWait(self.driver, 10).until_not(EC.text_to_be_present_in_element((By.XPATH, """//*[@id="UcAuthentification1_UcLogin1_txtPassword"]"""), ""))
+
+        print("Clicking login button")
+        self.driver.find_element(By.ID, """UcAuthentification1_UcLogin1_btnEntrer""").click()
         print("End of login")
 
     def __go_to_agenda(self):
