@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-uv run main.py
+docker compose down && docker rmi apialcuincalendar-api-alcuin-calendar:latest && docker compose up -d

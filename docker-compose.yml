@@ -1,11 +1,16 @@
 services:
   standalone-firefox:
     container_name: standalone-firefox
-    image: 'selenium/standalone-firefox:latest'
+    image: 'selenium/standalone-firefox:4.36.0-20251001'
     shm_size: 2g
+    environment:
+      SE_NODE_SESSION_TIMEOUT: 60
+      SE_NODE_MAX_SESSION_IDLE_TIME: 60
+      VNC_NO_PASSWORD: 'true'  # optionnel, pour VNC sans mot de passe
     networks:
       - selenium-network
     ports:
+      - 4444:4444  # Selenium
       - '7900:7900'  # VNC (optionnel)
     restart: unless-stopped  # optionnel, pour relancer si crash
     healthcheck:
@@ -33,6 +38,12 @@ services:
       - ./Calendars:/app/Calendars  # pour tes fichiers de calendrier
     #command: ["uv", "run", "main"]  # ou ton CMD par défaut dans Dockerfile
     restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5000" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
 networks:
   selenium-network:

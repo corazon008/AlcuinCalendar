@@ -1,5 +1,7 @@
 import json
 from pathlib import Path
+from typing import Iterable
+
 from utils.VARS import USERS_FILE
 
 
@@ -54,6 +56,10 @@ class UserManager:
     def user_exists_token(self, token: str) -> bool:
         """Check if a user exists by token"""
         return token in self.users
+
+    def __iter__(self)->Iterable[tuple[str, str, str]]:
+        for token, [username, password] in self.users.items():
+            yield token, username, password
 
 
 if __name__ == "__main__":
