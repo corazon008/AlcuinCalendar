@@ -29,6 +29,11 @@ def register():
     if not username or not password:
         return jsonify({'error': 'Missing username or password'}), 400
 
+    # Remove @esaip.org if any
+    domain = "@esaip.org"
+    if username.endswith(domain):
+        username = username[:-len(domain)]
+
     # Generate token (hash, max 16 chars)
     token_source = f'{username}:{password}:{os.urandom(8)}'
     token = hashlib.sha256(token_source.encode()).hexdigest()[:16]
