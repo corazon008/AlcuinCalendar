@@ -1,7 +1,10 @@
 import os
 import hashlib
+import logging
+import sys
+from flask import Flask, request, jsonify, Response
 
-from flask import Flask, Response, request, jsonify
+from scraper.RefreshQueue import RefreshQueue
 from utils.UserManager import UserManager
 from utils.VARS import SECRETS_FOLDER, BASE_DIR, CALENDAR_FOLDER
 from utils.utils import refresh_calendars
@@ -10,7 +13,17 @@ app = Flask(__name__)
 
 CACHE_DURATION = 3600  # 1 heure
 
+# Global logging config (Docker-friendly)
+logging.basicConfig(
+    level=logging.INFO,
+    format="[%(asctime)s] [%(levelname)s] %(name)s: %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    handlers=[logging.StreamHandler(sys.stdout)]
+)
+
 users = UserManager()
+refresh_queue = RefreshQueue()
+refresh_queue.start()  # start background worker
 
 
 # default route
@@ -21,30 +34,30 @@ def index():
         html = f.read()
     return Response(html, mimetype='text/html')
 
-
-@app.route('/register')
+@app.route("/register")
 def register():
-    username = request.args.get('username')
-    password = request.args.get('password')
+    username = request.args.get("username")
+    password = request.args.get("password")
+
     if not username or not password:
-        return jsonify({'error': 'Missing username or password'}), 400
+        return jsonify({"error": "Missing username or password"}), 400
 
-    # Remove @esaip.org if any
-    domain = "@esaip.org"
-    if username.endswith(domain):
-        username = username[:-len(domain)]
+    if username.endswith("@esaip.org"):
+        username = username.replace("@esaip.org", "")
 
-    # Generate token (hash, max 16 chars)
-    token_source = f'{username}:{password}:{os.urandom(8)}'
+    token_source = f"{username}:{password}:{os.urandom(8)}"
     token = hashlib.sha256(token_source.encode()).hexdigest()[:16]
 
-
     if users.user_exists_username(username):
-        return jsonify({'error': 'Username already exists'}), 400
+        return jsonify({"error": "Username already exists"}), 400
 
     users.add_user(username, password, token)
+    refresh_queue.add_task(token, username, password)
 
-    return jsonify({'token': token})
+    return jsonify({
+        "token": token,
+        "message": "User registered successfully; calendar refresh queued."
+    })
 
 
 @app.route('/agenda.ics')
@@ -84,10 +97,13 @@ def refresh():
     username = user['username']
     password = user['password']
 
-    if not refresh_calendars(token, username, password):
-        return jsonify({'error': 'Failed to refresh calendar'}), 500
+    refresh_queue.add_task(token, username, password)
+    return jsonify({'message': 'Calendar refresh queued.'}), 200
 
-    return jsonify({'status': 'Calendar refreshed successfully'})
+@app.route("/queue_status")
+def queue_status():
+    """Expose the current queue state."""
+    return jsonify(refresh_queue.status())
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
