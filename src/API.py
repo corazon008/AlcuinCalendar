@@ -3,7 +3,7 @@ import hashlib
 
 from flask import Flask, Response, request, jsonify
 from utils.UserManager import UserManager
-from utils.VARS import SECRETS_FOLDER, BASE_DIR
+from utils.VARS import SECRETS_FOLDER, BASE_DIR, CALENDAR_FOLDER
 from utils.utils import refresh_calendars
 
 app = Flask(__name__)
@@ -57,7 +57,7 @@ def agenda():
         return jsonify({'error': 'Invalid token'}), 401
 
     # Open ics file
-    ics_path = SECRETS_FOLDER / f"{token}.ics"
+    ics_path = CALENDAR_FOLDER / f"{token}.ics"
     if not os.path.exists(ics_path):
         return "ICS file not found", 404
     with open(ics_path, 'rb') as f:
