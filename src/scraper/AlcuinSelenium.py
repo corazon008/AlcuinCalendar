@@ -76,7 +76,8 @@ class AlcuinSelenium:
 
         select = Select(self.driver.find_element(By.XPATH,
                                                  """/html/body/form/div/table[1]/tbody/tr/td/div/table/tbody/tr[4]/td[1]/select"""))
-        select.select_by_visible_text("Tableau")
+        #select.select_by_visible_text("Tableau")
+        select.select_by_index(len(select.options)-1)
 
         print("End of go to agenda")
 
