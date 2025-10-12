@@ -33,9 +33,9 @@ services:
     ports:
       - 5000:5000  # exposer le port de ton API si besoin
     volumes:
-      - ./Logs:/app/Logs     # pour persister les logs hors du container
-      - ./Secrets:/app/Secrets  # pour tes fichiers secrets
-      - ./Calendars:/app/Calendars  # pour tes fichiers de calendrier
+      - ../Logs:/app/Logs     # pour persister les logs hors du container
+      - ../Secrets:/app/Secrets  # pour tes fichiers secrets
+      - ../Calendars:/app/Calendars  # pour tes fichiers de calendrier
     #command: ["uv", "run", "main"]  # ou ton CMD par défaut dans Dockerfile
     restart: unless-stopped
     healthcheck:
