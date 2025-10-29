@@ -7,7 +7,7 @@ from flask import Flask, request, jsonify, Response
 from scraper.RefreshQueue import RefreshQueue
 from utils.UserManager import UserManager
 from utils.VARS import SECRETS_FOLDER, BASE_DIR, CALENDAR_FOLDER
-from utils.utils import refresh_calendars
+from utils.utils import get_agenda_ics
 
 app = Flask(__name__)
 
@@ -70,11 +70,28 @@ def agenda():
         return jsonify({'error': 'Invalid token'}), 401
 
     # Open ics file
-    ics_path = CALENDAR_FOLDER / f"{token}.ics"
-    if not os.path.exists(ics_path):
+    if (ical := get_agenda_ics(token)) is False:
         return "ICS file not found", 404
-    with open(ics_path, 'rb') as f:
-        ical = f.read()
+
+    return Response(
+        ical,
+        mimetype='text/calendar',
+        headers={
+            'Cache-Control': f'public, max-age={CACHE_DURATION}'
+        }
+    )
+
+@app.route('/agenda/{token}.ics')
+def agenda_token(token):
+    if not token:
+        return jsonify({'error': 'Missing token'}), 401
+
+    if not users.user_exists_token(token):
+        return jsonify({'error': 'Invalid token'}), 401
+
+    # Open ics file
+    if (ical := get_agenda_ics(token)) is False:
+        return "ICS file not found", 404
 
     return Response(
         ical,
