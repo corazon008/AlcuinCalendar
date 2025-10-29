@@ -81,7 +81,7 @@ def agenda():
         }
     )
 
-@app.route('/agenda/{token}.ics')
+@app.route('/agenda/<token>.ics')
 def agenda_token(token):
     if not token:
         return jsonify({'error': 'Missing token'}), 401
