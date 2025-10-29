@@ -1,4 +1,4 @@
-FROM ghcr.io/astral-sh/uv:python-3.13-slim
+FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1
