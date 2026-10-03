@@ -59,7 +59,12 @@ services:
 
 networks:
   selenium-network:
+    name: selenium-network
     internal: true
+    ipam:
+      config:
+        - subnet: 172.60.0.0/24
+          gateway: 172.60.0.1
   proxy:
     name: proxy
     external: true
