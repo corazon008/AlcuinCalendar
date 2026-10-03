@@ -59,6 +59,7 @@ services:
 
 networks:
   selenium-network:
+    internal: true
   proxy:
-    name: proxy # Specifies the external network to connect to
-    external: true # Indicates that the network is external
+    name: proxy
+    external: true
