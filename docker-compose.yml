@@ -28,6 +28,7 @@ services:
         condition: service_healthy
     networks:
       - selenium-network
+      - proxy
     environment:
       # exemple : URL de Selenium accessible depuis Python
       SELENIUM_URL: http://standalone-firefox:4444/wd/hub
