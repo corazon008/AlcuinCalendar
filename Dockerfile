@@ -16,4 +16,4 @@ COPY . .
 
 WORKDIR /app/src
 
-CMD ["uv", "run", "gunicorn", "--bind", "0.0.0.0:5000", "API:app"]
+CMD ["uv", "run", "gunicorn", "--bind", "0.0.0.0:5000", "--workers", "1", "API:app"]

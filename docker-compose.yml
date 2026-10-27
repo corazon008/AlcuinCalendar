@@ -36,7 +36,7 @@ services:
     #command: ["uv", "run", "main"]  # ou ton CMD par défaut dans Dockerfile
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:5000" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:5000/healthz" ]
       interval: 5s
       timeout: 5s
       retries: 5

@@ -83,6 +83,7 @@ class AlcuinSelenium:
             self.logger.info("Calendar successfully scraped and saved")
         except Exception as e:
             self.logger.error(f"Failed to retrieve calendar: {e}", exc_info=True)
+            raise
         finally:
             self.close()
 

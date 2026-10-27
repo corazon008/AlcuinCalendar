@@ -1,15 +1,28 @@
 from scraper.AlcuinSelenium import AlcuinSelenium  # Import here to avoid circular import issues
-import time, os
+import logging
+import os
+import time
 
 from utils.VARS import CALENDAR_FOLDER
 
+logger = logging.getLogger(__name__)
+
+
+def _env_flag(name: str, default: bool) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() not in ("0", "false", "no", "off")
+
 
 def refresh_calendars(token: str, username: str, password: str)-> bool:
-    alcuin = AlcuinSelenium(token, username, password, headless=False)
+    # Headless by default when running in a container/server.
+    headless = _env_flag("SELENIUM_HEADLESS", True)
+    alcuin = AlcuinSelenium(token, username, password, headless=headless)
     try:
         alcuin.get_calendar()
     except Exception as e:
-        print(f"Error refreshing calendar for user {username}: {e}")
+        logger.error(f"Error refreshing calendar for user {username}: {e}")
         return False
     finally:
         alcuin.close()

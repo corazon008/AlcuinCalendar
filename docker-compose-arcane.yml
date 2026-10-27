@@ -1,20 +1,20 @@
 services:
   standalone-firefox:
     container_name: standalone-firefox
-    image: 'selenium/standalone-firefox:4.49.0-20260909'
+    image: "selenium/standalone-firefox:4.49.0-20260909"
     shm_size: 2g
     environment:
       SE_NODE_SESSION_TIMEOUT: 60
       SE_NODE_MAX_SESSION_IDLE_TIME: 60
-      VNC_NO_PASSWORD: 'true'  # optionnel, pour VNC sans mot de passe
+      VNC_NO_PASSWORD: "true" # optionnel, pour VNC sans mot de passe
     networks:
       - selenium-network
-    ports:
-      - 4444:4444  # Selenium
-      - '7900:7900'  # VNC (optionnel)
-    restart: unless-stopped  # optionnel, pour relancer si crash
+    #ports:
+    #  - 4444:4444  # Selenium
+    #  - '7900:7900'  # VNC (optionnel)
+    restart: unless-stopped # optionnel, pour relancer si crash
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:4444/wd/hub/status" ]
+      test: ["CMD", "curl", "-f", "http://localhost:4444/wd/hub/status"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -33,11 +33,11 @@ services:
       # exemple : URL de Selenium accessible depuis Python
       SELENIUM_URL: http://standalone-firefox:4444/wd/hub
     ports:
-      - 5000:5000  # exposer le port de ton API si besoin
+      - 5000:5000 # exposer le port de ton API si besoin
     volumes:
-      - ./Logs:/app/Logs     # pour persister les logs hors du container
-      - ./Secrets:/app/Secrets  # pour tes fichiers secrets
-      - ./Calendars:/app/Calendars  # pour tes fichiers de calendrier
+      - ./Logs:/app/Logs # pour persister les logs hors du container
+      - ./Secrets:/app/Secrets # pour tes fichiers secrets
+      - ./Calendars:/app/Calendars # pour tes fichiers de calendrier
     #command: ["uv", "run", "main"]  # ou ton CMD par défaut dans Dockerfile
     restart: unless-stopped
     labels:
@@ -52,7 +52,7 @@ services:
       - traefik.http.services.alcuin.loadbalancer.server.port=5000
       - traefik.docker.network=proxy
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:5000" ]
+      test: ["CMD", "curl", "-f", "http://localhost:5000/healthz"]
       interval: 5s
       timeout: 5s
       retries: 5
