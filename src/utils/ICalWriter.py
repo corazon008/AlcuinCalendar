@@ -1,8 +1,7 @@
-import uuid
-from datetime import datetime
-from icalendar import Calendar, Event, vText, vDatetime, Timezone
+import hashlib
+from datetime import datetime, timezone
+from icalendar import Calendar, Event, vText, vDatetime
 import pytz
-from dateutil.tz import gettz
 from utils.VARS import CALENDAR_FOLDER
 
 
@@ -11,12 +10,9 @@ class ICalWriter:
         self.calendar = Calendar()
         self.calendar.add('prodid', '-//My Calendar//EN')
         self.calendar.add('version', '2.0')
-
-        # Ajout du composant VTIMEZONE pour Europe/Paris
-        tz = gettz('Europe/Paris')
-        tzc = Timezone()
-        tzc.add('TZID', 'Europe/Paris')
-        self.calendar.add_component(tzc)
+        # UIDs must stay stable across refreshes, so identical events are
+        # counted to keep duplicates distinct without using random values.
+        self._uid_counters = {}
 
     def add_event(self, nom_cours, date_cours, heure_debut, heure_fin, salle):
         event = Event()
@@ -31,11 +27,19 @@ class ICalWriter:
         event.add('dtend', tz.localize(end_dt))
         event.add('location', vText(salle))
 
-        # Ajout des propriétés obligatoires
-        event.add('dtstamp', vDatetime(datetime.now(tz)))
-        event.add('uid', str(uuid.uuid4()) + '@mon-agenda.fr')
+        # DTSTAMP must be in UTC per RFC 5545
+        event.add('dtstamp', vDatetime(datetime.now(timezone.utc)))
+        event.add('uid', self._make_uid(nom_cours, date_cours, heure_debut, heure_fin, salle))
 
         self.calendar.add_component(event)
+
+    def _make_uid(self, *fields):
+        """Deterministic UID: same event keeps the same UID on every refresh."""
+        key = '|'.join(fields)
+        count = self._uid_counters.get(key, 0)
+        self._uid_counters[key] = count + 1
+        digest = hashlib.sha256(f"{key}|{count}".encode()).hexdigest()
+        return f"{digest}@mon-agenda.fr"
 
     def _parse_datetime(self, date_str, heure_str):
         date = datetime.strptime(date_str, '%d/%m/%Y')
@@ -44,9 +48,12 @@ class ICalWriter:
 
     def write_to_file(self, filename):
         with open(CALENDAR_FOLDER / f"{filename}.ics", 'wb') as f:
-            f.write(self.calendar.to_ical())
+            f.write(self.get_ical())
 
     def get_ical(self):
+        # Let icalendar emit a valid VTIMEZONE (with STANDARD/DAYLIGHT).
+        # An empty VTIMEZONE is rejected by strict parsers such as Nextcloud's.
+        self.calendar.add_missing_timezones()
         return self.calendar.to_ical()
 
     def add_event_from_cells(self, cells):
