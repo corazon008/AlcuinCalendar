@@ -32,7 +32,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="[%(asctime)s] [%(levelname)s] %(name)s: %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
-    handlers=[logging.StreamHandler(sys.stdout)]
+    handlers=[logging.StreamHandler(sys.stdout)],
 )
 logger = logging.getLogger(__name__)
 
@@ -53,7 +53,9 @@ def refresh_all_calendars():
             if refresh_queue.add_task(token, username, password):
                 queued += 1
         except Exception:
-            logger.error(f"Failed to queue refresh for {username}", exc_info=True)
+            logger.error(
+                f"Failed to queue refresh for {username}", exc_info=True
+            )
     logger.info(f"Scheduled refresh done: {queued} task(s) queued.")
 
 
@@ -65,7 +67,9 @@ scheduler = BackgroundScheduler(timezone=REFRESH_TIMEZONE)
 if REFRESH_ENABLED:
     try:
         if REFRESH_CRON:
-            trigger = CronTrigger.from_crontab(REFRESH_CRON, timezone=REFRESH_TIMEZONE)
+            trigger = CronTrigger.from_crontab(
+                REFRESH_CRON, timezone=REFRESH_TIMEZONE
+            )
         else:
             trigger = CronTrigger(
                 hour=int(os.getenv("REFRESH_HOUR", "2")),
@@ -82,23 +86,28 @@ if REFRESH_ENABLED:
         )
         scheduler.start()
         next_run = scheduler.get_job(REFRESH_JOB_ID).next_run_time
-        logger.info(f"APScheduler started (next refresh: {next_run.isoformat()})")
+        logger.info(
+            f"APScheduler started (next refresh: {next_run.isoformat()})"
+        )
     except Exception:
-        logger.error("Could not start scheduler; periodic refresh disabled", exc_info=True)
+        logger.error(
+            "Could not start scheduler; periodic refresh disabled",
+            exc_info=True,
+        )
 else:
     logger.info("Periodic refresh disabled (REFRESH_ENABLED=false)")
 
 
 # default route
-@app.route('/')
+@app.route("/")
 def index():
-    html_path = os.path.join(BASE_DIR, 'src', 'pages', 'index.html')
-    with open(html_path, 'r', encoding='utf-8') as f:
+    html_path = os.path.join(BASE_DIR, "src", "pages", "index.html")
+    with open(html_path, "r", encoding="utf-8") as f:
         html = f.read()
-    return Response(html, mimetype='text/html')
+    return Response(html, mimetype="text/html")
 
 
-@app.route('/healthz')
+@app.route("/healthz")
 def healthz():
     return jsonify({"status": "ok", "queue": refresh_queue.status()})
 
@@ -123,10 +132,12 @@ def register():
     users.add_user(username, password, token)
     refresh_queue.add_task(token, username, password)
 
-    return jsonify({
-        "token": token,
-        "message": "User registered successfully; calendar refresh queued."
-    })
+    return jsonify(
+        {
+            "token": token,
+            "message": "User registered successfully; calendar refresh queued.",
+        }
+    )
 
 
 def _calendar_response(ical: bytes, token: str) -> Response:
@@ -138,17 +149,19 @@ def _calendar_response(ical: bytes, token: str) -> Response:
     ).replace(microsecond=0)
 
     headers = {
-        'ETag': etag,
-        'Last-Modified': format_datetime(last_modified, usegmt=True),
-        'Cache-Control': f'public, max-age={CACHE_DURATION}',
+        "ETag": etag,
+        "Last-Modified": format_datetime(last_modified, usegmt=True),
+        "Cache-Control": f"public, max-age={CACHE_DURATION}",
     }
 
     # Conditional request handling (304 = unchanged, client keeps its copy).
-    if_none_match = request.headers.get('If-None-Match')
-    if if_none_match and etag in [value.strip() for value in if_none_match.split(',')]:
+    if_none_match = request.headers.get("If-None-Match")
+    if if_none_match and etag in [
+        value.strip() for value in if_none_match.split(",")
+    ]:
         return Response(status=304, headers=headers)
 
-    if_modified_since = request.headers.get('If-Modified-Since')
+    if_modified_since = request.headers.get("If-Modified-Since")
     if if_modified_since:
         try:
             since = parsedate_to_datetime(if_modified_since)
@@ -161,19 +174,19 @@ def _calendar_response(ical: bytes, token: str) -> Response:
 
     return Response(
         ical,
-        mimetype='text/calendar',
+        mimetype="text/calendar",
         headers=headers,
     )
 
 
-@app.route('/agenda.ics')
+@app.route("/agenda.ics")
 def agenda():
-    token = request.args.get('token')
+    token = request.args.get("token")
     if not token:
-        return jsonify({'error': 'Missing token'}), 401
+        return jsonify({"error": "Missing token"}), 401
 
     if not users.user_exists_token(token):
-        return jsonify({'error': 'Invalid token'}), 401
+        return jsonify({"error": "Invalid token"}), 401
 
     # Open ics file
     if (ical := get_agenda_ics(token)) is False:
@@ -182,13 +195,13 @@ def agenda():
     return _calendar_response(ical, token)
 
 
-@app.route('/agenda/<token>.ics')
+@app.route("/agenda/<token>.ics")
 def agenda_token(token):
     if not token:
-        return jsonify({'error': 'Missing token'}), 401
+        return jsonify({"error": "Missing token"}), 401
 
     if not users.user_exists_token(token):
-        return jsonify({'error': 'Invalid token'}), 401
+        return jsonify({"error": "Invalid token"}), 401
 
     # Open ics file
     if (ical := get_agenda_ics(token)) is False:
@@ -197,22 +210,22 @@ def agenda_token(token):
     return _calendar_response(ical, token)
 
 
-@app.route('/refresh')
+@app.route("/refresh")
 def refresh():
-    token = request.args.get('token')
+    token = request.args.get("token")
     if not token:
-        return jsonify({'error': 'Missing token'}), 401
+        return jsonify({"error": "Missing token"}), 401
 
     if not users.user_exists_token(token):
-        return jsonify({'error': 'Invalid token'}), 401
+        return jsonify({"error": "Invalid token"}), 401
 
     user = users.get_user(token)
-    username = user['username']
-    password = user['password']
+    username = user["username"]
+    password = user["password"]
 
     if refresh_queue.add_task(token, username, password):
-        return jsonify({'message': 'Calendar refresh queued.'}), 200
-    return jsonify({'message': 'Calendar refresh already queued/running.'}), 202
+        return jsonify({"message": "Calendar refresh queued."}), 200
+    return jsonify({"message": "Calendar refresh already queued/running."}), 202
 
 
 @app.route("/queue_status")
@@ -220,13 +233,19 @@ def queue_status():
     """Expose queue and scheduler state."""
     job = scheduler.get_job(REFRESH_JOB_ID) if REFRESH_ENABLED else None
     status = refresh_queue.status()
-    status.update({
-        "scheduler_enabled": REFRESH_ENABLED,
-        "scheduler_timezone": REFRESH_TIMEZONE,
-        "next_refresh": job.next_run_time.isoformat() if job and job.next_run_time else None,
-    })
+    status.update(
+        {
+            "scheduler_enabled": REFRESH_ENABLED,
+            "scheduler_timezone": REFRESH_TIMEZONE,
+            "next_refresh": (
+                job.next_run_time.isoformat()
+                if job and job.next_run_time
+                else None
+            ),
+        }
+    )
     return jsonify(status)
 
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)

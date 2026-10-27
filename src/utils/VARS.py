@@ -13,6 +13,6 @@ LOG_FOLDER.mkdir(parents=True, exist_ok=True)
 CALENDAR_FOLDER.mkdir(parents=True, exist_ok=True)
 
 # Files
-ACCESS_LOG_FILE : Path = LOG_FOLDER / "access.log"
-LOG_FILEs : Path = LOG_FOLDER / "app.log"
-USERS_FILE : Path = SECRETS_FOLDER / "users.json"
+ACCESS_LOG_FILE: Path = LOG_FOLDER / "access.log"
+LOG_FILEs: Path = LOG_FOLDER / "app.log"
+USERS_FILE: Path = SECRETS_FOLDER / "users.json"

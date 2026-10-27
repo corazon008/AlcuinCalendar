@@ -1,4 +1,6 @@
-from scraper.AlcuinSelenium import AlcuinSelenium  # Import here to avoid circular import issues
+from scraper.AlcuinSelenium import (
+    AlcuinSelenium,
+)  # Import here to avoid circular import issues
 import logging
 import os
 import time
@@ -15,7 +17,7 @@ def _env_flag(name: str, default: bool) -> bool:
     return value.strip().lower() not in ("0", "false", "no", "off")
 
 
-def refresh_calendars(token: str, username: str, password: str)-> bool:
+def refresh_calendars(token: str, username: str, password: str) -> bool:
     # Headless by default when running in a container/server.
     headless = _env_flag("SELENIUM_HEADLESS", True)
     alcuin = AlcuinSelenium(token, username, password, headless=headless)
@@ -28,6 +30,7 @@ def refresh_calendars(token: str, username: str, password: str)-> bool:
         alcuin.close()
     return True
 
+
 def retry(func, retries=3, delay=2, *args, **kwargs):
     """Retry a function a number of times with a delay"""
     for i in range(retries):
@@ -38,11 +41,12 @@ def retry(func, retries=3, delay=2, *args, **kwargs):
             time.sleep(delay)
     raise Exception(f"Failed after {retries} retries")
 
-def get_agenda_ics(token: str) -> bool|bytes:
+
+def get_agenda_ics(token: str) -> bool | bytes:
     # Open ics file
     ics_path = CALENDAR_FOLDER / f"{token}.ics"
     if not os.path.exists(ics_path):
         return False
-    with open(ics_path, 'rb') as f:
+    with open(ics_path, "rb") as f:
         ical = f.read()
     return ical

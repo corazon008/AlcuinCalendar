@@ -16,5 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 if __name__ == "__main__":
-    logger.info("Starting development server (scheduler already started by API import)")
+    logger.info(
+        "Starting development server (scheduler already started by API import)"
+    )
     API.app.run(host="0.0.0.0", port=5000)
