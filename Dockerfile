@@ -7,9 +7,12 @@ RUN apt update && apt upgrade -y && apt install -y unzip wget curl sudo git && r
 
 WORKDIR /app
 
-COPY . .
+COPY pyproject.toml pyproject.toml
+COPY uv.lock uv.lock
 
 RUN uv sync
+
+COPY . .
 
 WORKDIR /app/src
 
