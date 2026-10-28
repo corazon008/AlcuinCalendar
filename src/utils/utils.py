@@ -1,6 +1,3 @@
-from scraper.AlcuinSelenium import (
-    AlcuinSelenium,
-)  # Import here to avoid circular import issues
 import logging
 import os
 import time
@@ -18,6 +15,10 @@ def _env_flag(name: str, default: bool) -> bool:
 
 
 def refresh_calendars(token: str, username: str, password: str) -> bool:
+    # Local import: AlcuinSelenium imports this module, a top-level import
+    # would create a circular dependency.
+    from scraper.AlcuinSelenium import AlcuinSelenium
+
     # Headless by default when running in a container/server.
     headless = _env_flag("SELENIUM_HEADLESS", True)
     try:
