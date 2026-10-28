@@ -60,7 +60,6 @@ services:
 networks:
   selenium-network:
     name: selenium-network
-    internal: true
   proxy:
     name: proxy
     external: true
