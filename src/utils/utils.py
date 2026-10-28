@@ -20,7 +20,12 @@ def _env_flag(name: str, default: bool) -> bool:
 def refresh_calendars(token: str, username: str, password: str) -> bool:
     # Headless by default when running in a container/server.
     headless = _env_flag("SELENIUM_HEADLESS", True)
-    alcuin = AlcuinSelenium(token, username, password, headless=headless)
+    try:
+        alcuin = AlcuinSelenium(token, username, password, headless=headless)
+    except Exception as e:
+        logger.error(f"Could not start browser for user {username}: {e}")
+        return False
+
     try:
         alcuin.get_calendar()
     except Exception as e:

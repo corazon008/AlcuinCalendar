@@ -10,6 +10,8 @@ services:
     ports:
       #  - 4444:4444  # Selenium
       - "7900:7900" # VNC (optionnel)
+    networks:
+      - selenium-network
     restart: unless-stopped # optionnel, pour relancer si crash
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4444/wd/hub/status"]
@@ -25,6 +27,7 @@ services:
       standalone-firefox:
         condition: service_healthy
     networks:
+      - selenium-network
       - proxy
     environment:
       # exemple : URL de Selenium accessible depuis Python
@@ -55,6 +58,9 @@ services:
       start_period: 10s
 
 networks:
+  selenium-network:
+    name: selenium-network
+    internal: true
   proxy:
     name: proxy
     external: true

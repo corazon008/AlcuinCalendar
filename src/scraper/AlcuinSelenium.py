@@ -54,14 +54,32 @@ class AlcuinSelenium:
             options.add_argument("--headless")
 
         selenium_url = os.getenv("SELENIUM_URL")
-        try:
-            self.driver = webdriver.Remote(
-                command_executor=selenium_url,
-                options=options
-            )
-            self.logger.info(f"Connected to remote Selenium server at {selenium_url}")
-        except Exception as e:
-            self.logger.warning(f"Remote WebDriver connection failed: {e}. Falling back to local Firefox.")
+        if selenium_url:
+            allow_local_fallback = os.getenv(
+                "SELENIUM_ALLOW_LOCAL_FALLBACK", "false"
+            ).strip().lower() in ("1", "true", "yes", "on")
+            try:
+                self.driver = webdriver.Remote(
+                    command_executor=selenium_url,
+                    options=options
+                )
+                self.logger.info(f"Connected to remote Selenium server at {selenium_url}")
+            except Exception as e:
+                if not allow_local_fallback:
+                    # The API image has no browser: a local fallback can only
+                    # crash with an obscure error. Fail with the real cause.
+                    self.logger.error(
+                        f"Remote Selenium unreachable at {selenium_url}: {e}"
+                    )
+                    raise RuntimeError(
+                        f"Remote Selenium unreachable at {selenium_url}: {e}"
+                    ) from e
+                self.logger.warning(
+                    f"Remote WebDriver connection failed: {e}. Falling back to local Firefox."
+                )
+                self.driver = webdriver.Firefox(options=options)
+        else:
+            self.logger.info("No SELENIUM_URL set, using local Firefox")
             self.driver = webdriver.Firefox(options=options)
 
         self.driver.implicitly_wait(10)

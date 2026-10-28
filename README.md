@@ -36,6 +36,7 @@ https://<your-domain>/agenda/<token>.ics
 | `REFRESH_TIMEZONE` | `Europe/Paris` | Timezone for the refresh schedule |
 | `CALENDAR_CACHE_SECONDS` | `3600` | `Cache-Control` max-age for the ICS feed |
 | `SELENIUM_HEADLESS` | `true` | Run Firefox headless (set `false` for debugging) |
+| `SELENIUM_ALLOW_LOCAL_FALLBACK` | `false` | Fall back to a local Firefox when `SELENIUM_URL` is unreachable |
 
 Check the queue and next scheduled refresh:
 ```
