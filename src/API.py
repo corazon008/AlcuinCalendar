@@ -40,13 +40,22 @@ users = UserManager()
 refresh_queue = RefreshQueue()
 refresh_queue.start()  # start background worker
 
+logger.info(
+    f"Users file: {users.file_path} (found={users.file_path.exists()}, users={users.count()})"
+)
+
 
 # ---------------------------------------------------------------------
 # Scheduled refresh
 # ---------------------------------------------------------------------
 def refresh_all_calendars():
     """Queue a scrape for every registered user."""
-    logger.info("Scheduled refresh: queueing calendars...")
+    user_count = users.count()  # also reloads the file if it changed on disk
+    logger.info(f"Scheduled refresh: queueing calendars for {user_count} user(s)...")
+    if user_count == 0:
+        logger.warning(f"No users found in {users.file_path}; nothing to refresh")
+        return
+
     queued = 0
     for token, username, password in users:
         try:
@@ -242,6 +251,9 @@ def queue_status():
                 if job and job.next_run_time
                 else None
             ),
+            "users_count": users.count(),
+            "secrets_file": str(users.file_path),
+            "secrets_found": users.file_path.exists(),
         }
     )
     return jsonify(status)
