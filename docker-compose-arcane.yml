@@ -7,11 +7,9 @@ services:
       SE_NODE_SESSION_TIMEOUT: 60
       SE_NODE_MAX_SESSION_IDLE_TIME: 60
       VNC_NO_PASSWORD: "true" # optionnel, pour VNC sans mot de passe
-    networks:
-      - selenium-network
-    #ports:
-    #  - 4444:4444  # Selenium
-    #  - '7900:7900'  # VNC (optionnel)
+    ports:
+      #  - 4444:4444  # Selenium
+      - "7900:7900" # VNC (optionnel)
     restart: unless-stopped # optionnel, pour relancer si crash
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4444/wd/hub/status"]
@@ -27,7 +25,6 @@ services:
       standalone-firefox:
         condition: service_healthy
     networks:
-      - selenium-network
       - proxy
     environment:
       # exemple : URL de Selenium accessible depuis Python
@@ -38,7 +35,6 @@ services:
       - ./Logs:/app/Logs # pour persister les logs hors du container
       - ./Secrets:/app/Secrets # pour tes fichiers secrets
       - ./Calendars:/app/Calendars # pour tes fichiers de calendrier
-    #command: ["uv", "run", "main"]  # ou ton CMD par défaut dans Dockerfile
     restart: unless-stopped
     labels:
       - traefik.enable=true
@@ -59,13 +55,6 @@ services:
       start_period: 10s
 
 networks:
-  selenium-network:
-    name: selenium-network
-    internal: true
-    ipam:
-      config:
-        - subnet: 172.60.0.0/24
-          gateway: 172.60.0.1
   proxy:
     name: proxy
     external: true
